@@ -6,7 +6,7 @@ import Card from '../../components/UI/Card.jsx'
 import Button from '../../components/UI/Button.jsx'
 import { extractData, formatDateTime, formatMoney, statusClass } from '../../utils/formatters'
 
-const estados = ['', 'En revisión', 'En reparación', 'Listo para entrega', 'Entregado']
+const estados = ['', 'En revision', 'En reparacion', 'Listo para entregar', 'Entregado']
 
 const ListaOrdenes = () => {
 	const [ordenes, setOrdenes] = useState([])

@@ -50,6 +50,7 @@ export const capitalize = (value = '') => String(value).charAt(0).toUpperCase() 
 
 export const statusClass = (status = '') => {
 	const map = {
+		'En revision': 'bg-sky-50 text-sky-700 ring-sky-200',
 		'En revisión': 'bg-sky-50 text-sky-700 ring-sky-200',
 		'En reparacion': 'bg-amber-50 text-amber-700 ring-amber-200',
 		'En reparación': 'bg-amber-50 text-amber-700 ring-amber-200',
