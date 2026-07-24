@@ -1,5 +1,5 @@
 import axios from './axiosConfig'
 
-export const getStats = () => axios.get('/api/dashboard')
+export const getStats = (params = {}) => axios.get('/api/dashboard', { params })
 
 export default { getStats }

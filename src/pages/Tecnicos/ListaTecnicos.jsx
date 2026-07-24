@@ -1,47 +1,97 @@
-import { useEffect, useState } from 'react'
-import { Plus, Trash2, Wrench } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { ChevronLeft, ChevronRight, Plus, Trash2, Wrench } from 'lucide-react'
 import { toast } from 'react-toastify'
 import tecnicosApi from '../../api/tecnicosApi'
 import Card from '../../components/UI/Card.jsx'
 import Button from '../../components/UI/Button.jsx'
 import { extractData } from '../../utils/formatters'
 
+const emptyForm = { nombre: '', telefono: '' }
+const pageSize = 5
+
+const validateForm = (form) => {
+	const errors = {}
+	const nombre = form.nombre.trim()
+	const telefono = form.telefono.trim()
+	const phoneDigits = telefono.replace(/\D/g, '')
+
+	if (!nombre) errors.nombre = 'El nombre es obligatorio.'
+	else if (nombre.length < 2) errors.nombre = 'El nombre debe tener al menos 2 caracteres.'
+	else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/.test(nombre)) errors.nombre = 'El nombre solo puede contener letras, espacios, apóstrofes y guiones.'
+
+	if (telefono && !/^[+\d\s()-]+$/.test(telefono)) errors.telefono = 'El teléfono contiene caracteres no válidos.'
+	else if (telefono && phoneDigits.length < 6) errors.telefono = 'El teléfono debe contener al menos 6 dígitos.'
+	else if (telefono && phoneDigits.length > 15) errors.telefono = 'El teléfono no puede superar los 15 dígitos.'
+
+	return errors
+}
+
 const ListaTecnicos = () => {
 	const [tecnicos, setTecnicos] = useState([])
-	const [form, setForm] = useState({ nombre: '', telefono: '' })
+	const [form, setForm] = useState(emptyForm)
+	const [errors, setErrors] = useState({})
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
+	const [page, setPage] = useState(1)
+	const [pagination, setPagination] = useState({ totalItems: 0, currentPage: 1, totalPages: 0 })
 
-	const loadTecnicos = async () => {
+	const loadTecnicos = useCallback(async (requestedPage = page) => {
 		setLoading(true)
 		try {
-			const res = await tecnicosApi.getTecnicos({ limit: 50 })
+			const res = await tecnicosApi.getTecnicos({ page: requestedPage, limit: pageSize })
 			setTecnicos(extractData(res))
+			setPagination(res.data?.pagination || { totalItems: 0, currentPage: requestedPage, totalPages: 0 })
 		} finally {
 			setLoading(false)
 		}
-	}
+	}, [page])
 
 	useEffect(() => {
 		let active = true
-		tecnicosApi.getTecnicos({ limit: 50 }).then((res) => {
-			if (active) setTecnicos(extractData(res))
+		tecnicosApi.getTecnicos({ page, limit: pageSize }).then((res) => {
+			if (active) {
+				setTecnicos(extractData(res))
+				setPagination(res.data?.pagination || { totalItems: 0, currentPage: page, totalPages: 0 })
+			}
 		}).finally(() => {
 			if (active) setLoading(false)
 		})
 		return () => {
 			active = false
 		}
-	}, [])
+	}, [page])
+
+	const changePage = (nextPage) => {
+		setLoading(true)
+		setPage(nextPage)
+	}
+
+	const handleChange = (e) => {
+		const { name, value } = e.target
+		setForm((current) => ({ ...current, [name]: value }))
+		setErrors((current) => ({ ...current, [name]: undefined }))
+	}
 
 	const submit = async (e) => {
 		e.preventDefault()
+		const validationErrors = validateForm(form)
+
+		if (Object.keys(validationErrors).length) {
+			setErrors(validationErrors)
+			return
+		}
+
 		setSaving(true)
 		try {
-			await tecnicosApi.createTecnico(form)
+			await tecnicosApi.createTecnico({
+				nombre: form.nombre.trim(),
+				telefono: form.telefono.trim(),
+			})
 			toast.success('Técnico creado correctamente')
-			setForm({ nombre: '', telefono: '' })
-			await loadTecnicos()
+			setForm(emptyForm)
+			setErrors({})
+			if (page === 1) await loadTecnicos(1)
+			else changePage(1)
 		} finally {
 			setSaving(false)
 		}
@@ -51,7 +101,9 @@ const ListaTecnicos = () => {
 		if (!confirm(`¿Eliminar a ${tecnico.nombre}?`)) return
 		await tecnicosApi.deleteTecnico(tecnico.id)
 		toast.success('Técnico eliminado correctamente')
-		await loadTecnicos()
+
+		if (tecnicos.length === 1 && page > 1) changePage(page - 1)
+		else await loadTecnicos(page)
 	}
 
 	return (
@@ -64,21 +116,26 @@ const ListaTecnicos = () => {
 			<div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
 				<Card>
 					<h3 className="mb-4 flex items-center gap-2 text-lg font-black"><Plus size={18} /> Nuevo técnico</h3>
-					<form onSubmit={submit} className="grid gap-3">
+					<form onSubmit={submit} className="grid gap-3" noValidate>
 						<div className="space-y-1.5">
 							<label htmlFor="nombre">Nombre</label>
-							<input id="nombre" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required />
+							<input id="nombre" name="nombre" value={form.nombre} onChange={handleChange} maxLength="100" aria-invalid={Boolean(errors.nombre)} />
+							{errors.nombre && <p className="text-xs font-semibold text-red-600">{errors.nombre}</p>}
 						</div>
 						<div className="space-y-1.5">
 							<label htmlFor="telefono">Teléfono</label>
-							<input id="telefono" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+							<input id="telefono" name="telefono" type="tel" value={form.telefono} onChange={handleChange} maxLength="25" aria-invalid={Boolean(errors.telefono)} />
+							{errors.telefono && <p className="text-xs font-semibold text-red-600">{errors.telefono}</p>}
 						</div>
 						<Button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear técnico'}</Button>
 					</form>
 				</Card>
 
 				<Card>
-					<h3 className="mb-4 flex items-center gap-2 text-lg font-black"><Wrench size={18} /> Registrados</h3>
+					<div className="mb-4 flex items-center justify-between">
+						<h3 className="flex items-center gap-2 text-lg font-black"><Wrench size={18} /> Registrados</h3>
+						<span className="rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-600">{pagination.totalItems}</span>
+					</div>
 					{loading ? (
 						<div className="text-sm text-zinc-500">Cargando técnicos...</div>
 					) : (
@@ -95,6 +152,21 @@ const ListaTecnicos = () => {
 								</div>
 							))}
 							{tecnicos.length === 0 && <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-500">No hay técnicos registrados.</div>}
+							{pagination.totalPages > 1 && (
+								<div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+									<span className="text-xs font-semibold text-zinc-500">
+										Página {pagination.currentPage} de {pagination.totalPages}
+									</span>
+									<div className="flex gap-2">
+										<Button variant="secondary" onClick={() => changePage(page - 1)} disabled={page <= 1 || loading} title="Página anterior">
+											<ChevronLeft size={16} />
+										</Button>
+										<Button variant="secondary" onClick={() => changePage(page + 1)} disabled={page >= pagination.totalPages || loading} title="Página siguiente">
+											<ChevronRight size={16} />
+										</Button>
+									</div>
+								</div>
+							)}
 						</div>
 					)}
 				</Card>
