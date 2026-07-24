@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Trash2, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Trash2, Users } from 'lucide-react'
 import { toast } from 'react-toastify'
 import clientesApi from '../../api/clientesApi'
 import Card from '../../components/UI/Card.jsx'
@@ -45,22 +45,29 @@ const ListaClientes = () => {
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
 	const [page, setPage] = useState(1)
+	const [search, setSearch] = useState('')
+	const [appliedSearch, setAppliedSearch] = useState('')
 	const [pagination, setPagination] = useState({ totalItems: 0, currentPage: 1, totalPages: 0 })
 
-	const loadClientes = useCallback(async (requestedPage = page) => {
+	const loadClientes = useCallback(async (requestedPage = page, currentSearch = appliedSearch) => {
 		setLoading(true)
 		try {
-			const res = await clientesApi.getClientes({ page: requestedPage, limit: pageSize })
+			const params = { page: requestedPage, limit: pageSize }
+			if (currentSearch) params.search = currentSearch
+			const res = await clientesApi.getClientes(params)
 			setClientes(extractData(res))
 			setPagination(res.data?.pagination || { totalItems: 0, currentPage: requestedPage, totalPages: 0 })
 		} finally {
 			setLoading(false)
 		}
-	}, [page])
+	}, [appliedSearch, page])
 
 	useEffect(() => {
 		let active = true
-		clientesApi.getClientes({ page, limit: pageSize }).then((res) => {
+		const params = { page, limit: pageSize }
+		if (appliedSearch) params.search = appliedSearch
+
+		clientesApi.getClientes(params).then((res) => {
 			if (active) {
 				setClientes(extractData(res))
 				setPagination(res.data?.pagination || { totalItems: 0, currentPage: page, totalPages: 0 })
@@ -71,11 +78,26 @@ const ListaClientes = () => {
 		return () => {
 			active = false
 		}
-	}, [page])
+	}, [appliedSearch, page])
 
 	const changePage = (nextPage) => {
 		setLoading(true)
 		setPage(nextPage)
+	}
+
+	const handleSearch = (e) => {
+		e.preventDefault()
+		const nextSearch = search.trim()
+		setAppliedSearch(nextSearch)
+		if (page === 1) loadClientes(1, nextSearch)
+		else changePage(1)
+	}
+
+	const clearSearch = () => {
+		setSearch('')
+		setAppliedSearch('')
+		if (page === 1) loadClientes(1, '')
+		else changePage(1)
 	}
 
 	const handleChange = (e) => {
@@ -105,7 +127,9 @@ const ListaClientes = () => {
 			toast.success('Cliente creado correctamente')
 			setForm(emptyForm)
 			setErrors({})
-			if (page === 1) await loadClientes(1)
+			setSearch('')
+			setAppliedSearch('')
+			if (page === 1) await loadClientes(1, '')
 			else changePage(1)
 		} finally {
 			setSaving(false)
@@ -118,7 +142,7 @@ const ListaClientes = () => {
 		toast.success('Cliente eliminado correctamente')
 
 		if (clientes.length === 1 && page > 1) changePage(page - 1)
-		else await loadClientes(page)
+		else await loadClientes(page, appliedSearch)
 	}
 
 	return (
@@ -146,11 +170,26 @@ const ListaClientes = () => {
 				</Card>
 
 				<Card>
-					<div className="mb-4 flex items-center justify-between">
-						<h3 className="flex items-center gap-2 text-lg font-black">
-							<Users size={18} /> Registrados
-						</h3>
-						<span className="rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-600">{pagination.totalItems}</span>
+					<div className="mb-4 flex flex-col gap-3">
+						<div className="flex items-center justify-between">
+							<h3 className="flex items-center gap-2 text-lg font-black">
+								<Users size={18} /> Registrados
+							</h3>
+							<span className="rounded-md bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-600">{pagination.totalItems}</span>
+						</div>
+						<form onSubmit={handleSearch} className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+							<div className="relative">
+								<Search className="pointer-events-none absolute left-3 top-2.5 text-zinc-400" size={18} />
+								<input
+									className="pl-10"
+									placeholder="Buscar por nombre, DNI/RUC, teléfono, correo o dirección"
+									value={search}
+									onChange={(e) => setSearch(e.target.value)}
+								/>
+							</div>
+							<Button type="submit" variant="secondary">Buscar</Button>
+							{appliedSearch && <Button type="button" variant="ghost" onClick={clearSearch}>Limpiar</Button>}
+						</form>
 					</div>
 
 					{loading ? (
@@ -186,7 +225,7 @@ const ListaClientes = () => {
 										))}
 										{clientes.length === 0 && (
 											<tr>
-												<td colSpan="3" className="px-4 py-8 text-center text-zinc-500">No hay clientes registrados.</td>
+												<td colSpan="3" className="px-4 py-8 text-center text-zinc-500">No hay clientes para mostrar.</td>
 											</tr>
 										)}
 									</tbody>

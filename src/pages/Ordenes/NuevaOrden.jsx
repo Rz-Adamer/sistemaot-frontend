@@ -25,7 +25,7 @@ const NuevaOrden = () => {
 	const [clientes, setClientes] = useState([])
 	const [tecnicos, setTecnicos] = useState([])
 	const [saving, setSaving] = useState(false)
-	const [form, setForm] = useState({ cliente_id: '', observacion_general: '', equipos: [createEmptyEquipo()] })
+	const [form, setForm] = useState({ cliente_id: '', numero_guia: '', observacion_general: '', equipos: [createEmptyEquipo()] })
 
 	useEffect(() => {
 		Promise.all([clientesApi.getClientes({ limit: 100 }), tecnicosApi.getTecnicos({ limit: 100 })]).then(([clientesRes, tecnicosRes]) => {
@@ -50,10 +50,15 @@ const NuevaOrden = () => {
 			toast.error('Selecciona un cliente para crear la orden')
 			return
 		}
+		if (form.numero_guia && !/^[A-Za-z0-9 ]+$/.test(form.numero_guia.trim())) {
+			toast.error('El numero de guia solo puede contener letras y numeros')
+			return
+		}
 		setSaving(true)
 		try {
 			const payload = {
 				...form,
+				numero_guia: form.numero_guia.trim(),
 				equipos: form.equipos.map((equipo) => ({ ...equipo, tecnico_id: equipo.tecnico_id || null })),
 			}
 			await ordenesApi.createOrden(payload)
@@ -82,6 +87,14 @@ const NuevaOrden = () => {
 							onChange={(clienteId) => setForm({ ...form, cliente_id: clienteId })}
 						/>
 					</div>
+					<Field
+						label="Numero de guia"
+						id="numero_guia"
+						value={form.numero_guia}
+						onChange={(e) => setForm({ ...form, numero_guia: e.target.value })}
+						maxLength="40"
+						placeholder="Opcional, letras y numeros"
+					/>
 					<div className="space-y-1.5">
 						<label htmlFor="observacion_general">Observacion general</label>
 						<textarea

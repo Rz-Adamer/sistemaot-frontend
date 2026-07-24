@@ -35,7 +35,7 @@ const DetalleOrden = () => {
 		setOrden(data)
 		if (!data) return
 		setForm({ estado: data.estado, mano_obra: data.mano_obra || 0, observacion_general: data.observacion_general || '' })
-		setEquiposForm(Object.fromEntries((data.equipos_orden || []).map(equipo => [equipo.id, { tecnico_id: equipo.tecnico_id || '', diagnostico_especifico: cleanText(equipo.diagnostico_especifico), tipo_solucion: cleanText(equipo.tipo_solucion) }])))
+		setEquiposForm(Object.fromEntries((data.equipos_orden || []).map(equipo => [equipo.id, { tecnico_id: equipo.tecnico_id || '', diagnostico_especifico: cleanText(equipo.diagnostico_especifico), tipo_solucion: cleanText(equipo.tipo_solucion), costo_solucion: equipo.costo_solucion || 0 }])))
 		setRepuesto(current => ({ ...current, equipo_orden_id: current.equipo_orden_id || data.equipos_orden?.[0]?.id || '' }))
 	}
 
@@ -63,7 +63,11 @@ const DetalleOrden = () => {
 	const canEditCosts = orden?.estado === 'En reparacion'
 	const canAddRepuesto = orden?.estado === 'En reparacion'
 	const subtotalRepuesto = (Number(repuesto.costo) || 0) * (Number(repuesto.cantidad) || 0)
-	const totalPreview = useMemo(() => Number(form.mano_obra || 0) + Number(orden?.total_repuestos || 0), [form.mano_obra, orden?.total_repuestos])
+	const totalServiciosPreview = useMemo(
+		() => Object.values(equiposForm).reduce((total, equipo) => total + (Number(equipo.costo_solucion) || 0), 0),
+		[equiposForm],
+	)
+	const totalPreview = useMemo(() => totalServiciosPreview + Number(orden?.total_repuestos || 0), [totalServiciosPreview, orden?.total_repuestos])
 
 	const updateEquipoField = (equipoId, field, value) => {
 		setEquiposForm(current => ({ ...current, [equipoId]: { ...current[equipoId], [field]: value } }))
@@ -74,6 +78,7 @@ const DetalleOrden = () => {
 		if (['Listo para entregar', 'Entregado'].includes(form.estado)) {
 			const faltanDiagnosticos = orden.equipos_orden.some(equipo => !equiposForm[equipo.id]?.diagnostico_especifico?.trim())
 			const faltanSoluciones = orden.equipos_orden.some(equipo => !equiposForm[equipo.id]?.tipo_solucion)
+			const costosInvalidos = orden.equipos_orden.some(equipo => Number(equiposForm[equipo.id]?.costo_solucion || 0) < 0)
 			if (faltanDiagnosticos) {
 				toast.error('Todos los equipos deben tener diagnostico.')
 				return
@@ -82,11 +87,15 @@ const DetalleOrden = () => {
 				toast.error('Todos los equipos deben tener tipo de solucion.')
 				return
 			}
+			if (costosInvalidos) {
+				toast.error('El costo de solucion no puede ser negativo.')
+				return
+			}
 		}
 		setSaving(true)
 		try {
 			await Promise.all(orden.equipos_orden.map(equipo => ordenesApi.updateEquipo(id, equipo.id, equiposForm[equipo.id])))
-			await ordenesApi.updateOrden(id, { ...form, mano_obra: Number(form.mano_obra) || 0 })
+			await ordenesApi.updateOrden(id, { ...form, mano_obra: totalServiciosPreview })
 			await loadOrden()
 			toast.success('Orden actualizada correctamente')
 		} finally {
@@ -137,6 +146,8 @@ const DetalleOrden = () => {
 						<div className="grid gap-3 rounded-lg bg-zinc-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
 							<Info label="Cliente" value={orden.clientes?.nombre} />
 							<Info label="DNI/RUC" value={orden.clientes?.identificacion} />
+							<Info label="Telefono" value={orden.clientes?.telefono} />
+							<Info label="Numero de guia" value={orden.numero_guia} />
 							<Info label="Ingreso" value={formatDateTime(orden.fecha_ingreso)} />
 							<Info label="Finalización" value={formatDateTime(orden.fecha_finalizado)} />
 							<Info label="Entrega" value={formatDateTime(orden.fecha_entrega)} />
@@ -152,6 +163,7 @@ const DetalleOrden = () => {
 								<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 									<Info label="Técnico" value={equipo.tecnicos?.nombre} /><Info label="Accesorios" value={equipo.accesorios_entregados} /><Info label="Condiciones físicas" value={equipo.condiciones_fisicas} /><Info label="Motivo de ingreso" value={equipo.motivo_ingreso} /><Info label="Diagnóstico" value={cleanText(equipo.diagnostico_especifico)} />
 									<Info label="Tipo de solución" value={cleanText(equipo.tipo_solucion)} />
+									<Info label="Costo de solución" value={formatMoney(equipo.costo_solucion)} />
 								</div>
 							</div>
 						))}
@@ -165,7 +177,7 @@ const DetalleOrden = () => {
 								{orden.repuestos?.length === 0 && <tr><td colSpan="6" className="px-3 py-8 text-center text-zinc-500">No hay repuestos agregados.</td></tr>}</tbody>
 							</table>
 						</div>
-						<div className="grid gap-3 rounded-lg bg-zinc-50 p-4 sm:grid-cols-3"><Info label="Repuestos" value={formatMoney(orden.total_repuestos)} /><Info label="Mano de obra" value={formatMoney(orden.mano_obra)} /><Info label="Total" value={formatMoney(orden.precio_total)} /></div>
+						<div className="grid gap-3 rounded-lg bg-zinc-50 p-4 sm:grid-cols-3"><Info label="Repuestos" value={formatMoney(orden.total_repuestos)} /><Info label="Servicios" value={formatMoney(orden.mano_obra)} /><Info label="Total sin IGV" value={formatMoney(orden.precio_total)} /></div>
 					</Card>
 
 					<Card className="space-y-3">
@@ -185,8 +197,9 @@ const DetalleOrden = () => {
 								<div className="space-y-1.5"><label>Técnico asignado</label><select value={equiposForm[equipo.id]?.tecnico_id || ''} onChange={e => updateEquipoField(equipo.id, 'tecnico_id', e.target.value)} disabled={delivered}><option value="">Sin asignar</option>{tecnicos.map(tecnico => <option key={tecnico.id} value={tecnico.id}>{tecnico.nombre}</option>)}</select></div>
 								<div className="space-y-1.5"><label>Diagnóstico</label><textarea rows="3" value={equiposForm[equipo.id]?.diagnostico_especifico || ''} onChange={e => updateEquipoField(equipo.id, 'diagnostico_especifico', e.target.value)} disabled={delivered} /></div>
 								<div className="space-y-1.5"><label>Tipo de solución</label><select value={equiposForm[equipo.id]?.tipo_solucion || ''} onChange={e => updateEquipoField(equipo.id, 'tipo_solucion', e.target.value)} disabled={delivered}><option value="">Seleccionar</option>{soluciones.map(solucion => <option key={solucion}>{solucion}</option>)}</select></div>
+								<div className="space-y-1.5"><label>Costo de solución</label><input type="number" min="0" step="0.01" value={equiposForm[equipo.id]?.costo_solucion ?? 0} onChange={e => updateEquipoField(equipo.id, 'costo_solucion', e.target.value)} disabled={!canEditCosts || delivered} /></div>
 							</div>)}
-							<div className="space-y-1.5"><label htmlFor="mano_obra">Mano de obra</label><input id="mano_obra" type="number" min="0" step="0.01" value={form.mano_obra} onChange={e => setForm({ ...form, mano_obra: e.target.value })} disabled={!canEditCosts} /><p className="text-xs text-zinc-500">Total calculado: {formatMoney(totalPreview)}</p></div>
+							<div className="rounded-lg bg-zinc-50 p-3 text-sm font-bold">Servicios: {formatMoney(totalServiciosPreview)} · Repuestos: {formatMoney(orden.total_repuestos)} · Total calculado: {formatMoney(totalPreview)}</div>
 							<div className="space-y-1.5"><label htmlFor="observacion_general">Observación</label><textarea id="observacion_general" rows="4" value={form.observacion_general} onChange={e => setForm({ ...form, observacion_general: e.target.value })} disabled={delivered} /></div>
 							<Button type="submit" disabled={saving || delivered}>{saving ? 'Guardando...' : 'Guardar cambios'}</Button>
 						</form>

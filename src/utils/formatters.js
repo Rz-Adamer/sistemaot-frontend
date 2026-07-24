@@ -55,6 +55,7 @@ export const statusClass = (status = '') => {
 		'En reparacion': 'bg-amber-50 text-amber-700 ring-amber-200',
 		'En reparación': 'bg-amber-50 text-amber-700 ring-amber-200',
 		'Listo para entrega': 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+		'Listo para entregar': 'bg-emerald-50 text-emerald-700 ring-emerald-200',
 		Entregado: 'bg-zinc-100 text-zinc-700 ring-zinc-200',
 	}
 	return map[status] || 'bg-zinc-100 text-zinc-700 ring-zinc-200'
