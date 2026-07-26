@@ -51,10 +51,13 @@ const DetalleOrden = () => {
 
 	useEffect(() => {
 		let active = true
-		Promise.all([ordenesApi.getOrden(id), tecnicosApi.getTecnicos({ limit: 100 })]).then(([ordenRes, tecnicosRes]) => {
-			if (!active) return
-			applyOrden(ordenRes.data?.data)
-			setTecnicos(extractData(tecnicosRes))
+		ordenesApi.getOrden(id).then((ordenRes) => {
+			if (active) applyOrden(ordenRes.data?.data)
+			return tecnicosApi.getTecnicos({ limit: 100 }, { silent: true })
+		}).then((tecnicosRes) => {
+			if (active) setTecnicos(extractData(tecnicosRes))
+		}).catch(() => {
+			if (active) setTecnicos([])
 		}).finally(() => active && setLoading(false))
 		return () => { active = false }
 	}, [id])
