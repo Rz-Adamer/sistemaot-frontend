@@ -110,7 +110,7 @@ const ListaTecnicos = () => {
 		<div className="space-y-6">
 			<div>
 				<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Equipo técnico</p>
-				<h2 className="text-3xl font-black text-zinc-950">Técnicos</h2>
+				<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Técnicos</h2>
 			</div>
 
 			<div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
@@ -153,11 +153,11 @@ const ListaTecnicos = () => {
 							))}
 							{tecnicos.length === 0 && <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-500">No hay técnicos registrados.</div>}
 							{pagination.totalPages > 1 && (
-								<div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+								<div className="flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
 									<span className="text-xs font-semibold text-zinc-500">
 										Página {pagination.currentPage} de {pagination.totalPages}
 									</span>
-									<div className="flex gap-2">
+									<div className="grid grid-cols-2 gap-2 sm:flex">
 										<Button variant="secondary" onClick={() => changePage(page - 1)} disabled={page <= 1 || loading} title="Página anterior">
 											<ChevronLeft size={16} />
 										</Button>
