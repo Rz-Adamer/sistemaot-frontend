@@ -150,7 +150,7 @@ const ListaClientes = () => {
 			<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
 				<div>
 					<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Base comercial</p>
-					<h2 className="text-3xl font-black text-zinc-950">Clientes</h2>
+					<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Clientes</h2>
 				</div>
 			</div>
 
@@ -187,8 +187,8 @@ const ListaClientes = () => {
 									onChange={(e) => setSearch(e.target.value)}
 								/>
 							</div>
-							<Button type="submit" variant="secondary">Buscar</Button>
-							{appliedSearch && <Button type="button" variant="ghost" onClick={clearSearch}>Limpiar</Button>}
+							<Button type="submit" variant="secondary" className="w-full sm:w-auto">Buscar</Button>
+							{appliedSearch && <Button type="button" variant="ghost" onClick={clearSearch} className="w-full sm:w-auto">Limpiar</Button>}
 						</form>
 					</div>
 
@@ -196,7 +196,7 @@ const ListaClientes = () => {
 						<div className="text-sm text-zinc-500">Cargando clientes...</div>
 					) : (
 						<div className="grid gap-3">
-							<div className="overflow-hidden rounded-lg border border-zinc-200">
+							<div className="overflow-x-auto rounded-lg border border-zinc-200">
 								<table className="w-full text-left text-sm">
 									<thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
 										<tr>
@@ -232,11 +232,11 @@ const ListaClientes = () => {
 								</table>
 							</div>
 							{pagination.totalPages > 1 && (
-								<div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+								<div className="flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
 									<span className="text-xs font-semibold text-zinc-500">
 										Página {pagination.currentPage} de {pagination.totalPages}
 									</span>
-									<div className="flex gap-2">
+									<div className="grid grid-cols-2 gap-2 sm:flex">
 										<Button variant="secondary" onClick={() => changePage(page - 1)} disabled={page <= 1 || loading} title="Página anterior">
 											<ChevronLeft size={16} />
 										</Button>

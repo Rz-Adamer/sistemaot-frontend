@@ -47,7 +47,7 @@ const LogsAuditoria = () => {
 		<div className="space-y-6">
 			<div>
 				<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Administración</p>
-				<h2 className="text-3xl font-black text-zinc-950">Auditoría</h2>
+				<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Auditoría</h2>
 			</div>
 
 			<Card>
@@ -67,7 +67,7 @@ const LogsAuditoria = () => {
 					</div>
 				) : (
 					<div className="grid gap-3">
-						<div className="overflow-hidden rounded-lg border border-zinc-200">
+						<div className="overflow-x-auto rounded-lg border border-zinc-200">
 							<table className="w-full text-left text-sm">
 								<thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
 									<tr>
@@ -101,11 +101,11 @@ const LogsAuditoria = () => {
 							</table>
 						</div>
 						{pagination.totalPaginas > 1 && (
-							<div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+							<div className="flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
 								<span className="text-xs font-semibold text-zinc-500">
 									Página {pagination.paginaActual} de {pagination.totalPaginas}
 								</span>
-								<div className="flex gap-2">
+								<div className="grid grid-cols-2 gap-2 sm:flex">
 									<Button variant="secondary" onClick={() => changePage(page - 1)} disabled={page <= 1 || loading} title="Página anterior">
 										<ChevronLeft size={16} />
 									</Button>

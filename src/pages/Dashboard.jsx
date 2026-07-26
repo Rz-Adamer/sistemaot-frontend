@@ -60,9 +60,9 @@ const Dashboard = () => {
 			<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
 				<div>
 					<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Resumen operativo</p>
-					<h2 className="text-3xl font-black text-zinc-950">Dashboard</h2>
+					<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Dashboard</h2>
 				</div>
-				<div className="grid gap-2 sm:grid-cols-[170px_140px]">
+				<div className="grid w-full gap-2 sm:w-auto sm:grid-cols-[170px_140px]">
 					<select value={filters.mes} onChange={(e) => updateFilters({ ...filters, mes: e.target.value })} aria-label="Mes del dashboard">
 						{meses.map((mes) => (
 							<option key={mes.value || 'todos'} value={mes.value}>{mes.label}</option>
@@ -76,7 +76,7 @@ const Dashboard = () => {
 				</div>
 			</div>
 
-			<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+			<div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
 				<Kpi icon={Banknote} label="Ingresos" value={formatMoney(kpis.ingresosTotales)} />
 				<Kpi icon={ClipboardList} label="Órdenes" value={kpis.totalOrdenes ?? 0} />
 				<Kpi icon={Activity} label="Activas" value={kpis.ordenesActivas ?? 0} />
@@ -92,7 +92,7 @@ const Dashboard = () => {
 						</div>
 						{loading && <span className="text-xs font-bold text-teal-700">Actualizando...</span>}
 					</div>
-					<div className="h-80">
+					<div className="h-72 sm:h-80">
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={stats?.graficoRendimiento || []}>
 								<CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -108,7 +108,7 @@ const Dashboard = () => {
 
 				<Card>
 					<h3 className="mb-4 text-lg font-black">Estados</h3>
-					<div className="h-80">
+					<div className="h-72 sm:h-80">
 						<ResponsiveContainer width="100%" height="100%">
 							<PieChart>
 								<Pie data={stats?.graficoEstados || []} dataKey="cantidad" nameKey="estado" outerRadius={105} label>

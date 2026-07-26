@@ -1,16 +1,26 @@
-import { LogOut, Shield, UserRound } from 'lucide-react'
+import { LogOut, Menu, Shield, UserRound } from 'lucide-react'
 import useAuth from '../hooks/useAuth.js'
 import Button from './UI/Button.jsx'
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
 	const { user, logout, roleLabel } = useAuth()
 
 	return (
 		<header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/90 backdrop-blur">
 			<div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-				<div>
-					<p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Panel de trabajo</p>
-					<h1 className="text-lg font-bold text-zinc-950">{user?.nombre_taller || 'SistemaOT'}</h1>
+				<div className="flex min-w-0 items-center gap-3">
+					<button
+						type="button"
+						onClick={onMenuClick}
+						className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 md:hidden"
+						aria-label="Abrir menú"
+					>
+						<Menu size={20} />
+					</button>
+					<div className="min-w-0">
+						<p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Panel de trabajo</p>
+						<h1 className="truncate text-lg font-bold text-zinc-950">{user?.nombre_taller || 'SistemaOT'}</h1>
+					</div>
 				</div>
 
 				<div className="flex items-center gap-3">

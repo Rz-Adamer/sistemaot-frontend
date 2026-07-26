@@ -97,7 +97,7 @@ const ListaOrdenes = () => {
 			<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
 				<div>
 					<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Operación diaria</p>
-					<h2 className="text-3xl font-black text-zinc-950">Órdenes</h2>
+					<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Órdenes</h2>
 				</div>
 				<Link to="/ordenes/nueva">
 					<Button><Plus size={16} /> Crear orden</Button>
@@ -132,8 +132,8 @@ const ListaOrdenes = () => {
 								<option key={year} value={year}>{year}</option>
 							))}
 						</select>
-						<Button type="submit" variant="secondary">Filtrar</Button>
-						<Button type="button" variant="ghost" onClick={clearFilters}>Limpiar</Button>
+						<Button type="submit" variant="secondary" className="w-full lg:w-auto">Filtrar</Button>
+						<Button type="button" variant="ghost" onClick={clearFilters} className="w-full lg:w-auto">Limpiar</Button>
 					</div>
 				</form>
 			</Card>
@@ -197,11 +197,11 @@ const ListaOrdenes = () => {
 						})}
 						{ordenes.length === 0 && <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-500">No hay órdenes para mostrar.</div>}
 						{pagination.totalPages > 1 && (
-							<div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+							<div className="flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
 								<span className="text-xs font-semibold text-zinc-500">
 									Página {pagination.currentPage} de {pagination.totalPages}
 								</span>
-								<div className="flex gap-2">
+								<div className="grid grid-cols-2 gap-2 sm:flex">
 									<Button variant="secondary" onClick={() => changePage(page - 1)} disabled={page <= 1 || loading} title="Página anterior">
 										<ChevronLeft size={16} />
 									</Button>

@@ -8,7 +8,7 @@ const variants = {
 const Button = ({ children, className = '', variant = 'primary', type = 'button', ...props }) => (
 	<button
 		type={type}
-		className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`}
+		className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`}
 		{...props}
 	>
 		{children}

@@ -73,7 +73,7 @@ const NuevaOrden = () => {
 		<div className="space-y-6">
 			<div>
 				<p className="text-sm font-bold uppercase tracking-wide text-teal-700">Nueva recepcion</p>
-				<h2 className="text-3xl font-black text-zinc-950">Crear orden</h2>
+				<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Crear orden</h2>
 			</div>
 
 			<form onSubmit={submit} className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
@@ -107,7 +107,7 @@ const NuevaOrden = () => {
 				</Card>
 
 				<Card className="space-y-4">
-					<div className="flex items-center justify-between"><h3 className="text-lg font-black">Equipos recibidos</h3><Button variant="secondary" onClick={addEquipo}><Plus size={16} /> Agregar equipo</Button></div>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><h3 className="text-lg font-black">Equipos recibidos</h3><Button variant="secondary" onClick={addEquipo} className="w-full sm:w-auto"><Plus size={16} /> Agregar equipo</Button></div>
 					{form.equipos.map((equipo, index) => (
 						<div key={index} className="space-y-3 rounded-lg border border-zinc-200 p-4">
 							<div className="flex items-center justify-between"><div className="font-black">Equipo {index + 1}</div>{form.equipos.length > 1 && <Button variant="ghost" onClick={() => removeEquipo(index)} title="Quitar equipo"><Trash2 size={16} /></Button>}</div>
@@ -131,7 +131,7 @@ const NuevaOrden = () => {
 							</div>
 						</div>
 					))}
-					<div className="flex justify-end gap-2">
+					<div className="grid gap-2 sm:flex sm:justify-end">
 						<Button variant="secondary" onClick={() => navigate('/ordenes')}>Cancelar</Button>
 						<Button type="submit" disabled={saving}>{saving ? 'Creando...' : 'Crear orden'}</Button>
 					</div>
