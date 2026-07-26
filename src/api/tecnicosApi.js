@@ -1,6 +1,6 @@
 import axios from './axiosConfig'
 
-export const getTecnicos = (params = {}) => axios.get('/api/tecnicos', { params })
+export const getTecnicos = (params = {}, config = {}) => axios.get('/api/tecnicos', { ...config, params })
 
 export const createTecnico = (payload) => axios.post('/api/tecnicos', payload)
 

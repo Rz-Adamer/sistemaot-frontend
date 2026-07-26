@@ -84,7 +84,7 @@ const Dashboard = () => {
 			</div>
 
 			<div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
-				<Card>
+				<Card className="min-w-0">
 					<div className="mb-4 flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
 						<div>
 							<h3 className="text-lg font-black">{chartTitle}</h3>
@@ -92,7 +92,7 @@ const Dashboard = () => {
 						</div>
 						{loading && <span className="text-xs font-bold text-teal-700">Actualizando...</span>}
 					</div>
-					<div className="h-72 sm:h-80">
+					<div className="h-72 min-h-72 min-w-0 sm:h-80">
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={stats?.graficoRendimiento || []}>
 								<CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -106,9 +106,9 @@ const Dashboard = () => {
 					</div>
 				</Card>
 
-				<Card>
+				<Card className="min-w-0">
 					<h3 className="mb-4 text-lg font-black">Estados</h3>
-					<div className="h-72 sm:h-80">
+					<div className="h-72 min-h-72 min-w-0 sm:h-80">
 						<ResponsiveContainer width="100%" height="100%">
 							<PieChart>
 								<Pie data={stats?.graficoEstados || []} dataKey="cantidad" nameKey="estado" outerRadius={105} label>
