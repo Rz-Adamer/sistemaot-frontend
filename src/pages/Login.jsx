@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MonitorCog } from 'lucide-react'
+import { Eye, EyeOff, MonitorCog } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth.js'
 import { isAdmin } from '../utils/formatters'
@@ -8,6 +8,7 @@ import Button from '../components/UI/Button.jsx'
 const Login = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [showPassword, setShowPassword] = useState(false)
 	const [loading, setLoading] = useState(false)
 	const auth = useAuth()
 	const navigate = useNavigate()
@@ -69,14 +70,26 @@ const Login = () => {
 						</div>
 						<div className="space-y-2">
 							<label htmlFor="password">Contraseña</label>
-							<input
-								id="password"
-								type="password"
-								placeholder="Tu contraseña"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								required
-							/>
+							<div className="relative">
+								<input
+									id="password"
+									type={showPassword ? 'text' : 'password'}
+									placeholder="Tu contraseña"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									className="pr-11"
+									required
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword((current) => !current)}
+									className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+									aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+									title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+								>
+									{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+								</button>
+							</div>
 						</div>
 						<Button type="submit" disabled={loading} className="w-full">
 							{loading ? 'Ingresando...' : 'Ingresar'}

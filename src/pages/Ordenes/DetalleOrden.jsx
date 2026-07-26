@@ -129,7 +129,7 @@ const DetalleOrden = () => {
 				<div>
 					<Link to="/ordenes" className="mb-2 inline-flex items-center gap-2 text-sm font-bold text-teal-700"><ArrowLeft size={16} /> Volver</Link>
 					<div className="flex flex-wrap items-center gap-3">
-						<h2 className="text-3xl font-black text-zinc-950">Orden #{orden.id}</h2>
+						<h2 className="text-2xl font-black text-zinc-950 sm:text-3xl">Orden #{orden.id}</h2>
 						<span className={`rounded-full px-3 py-1 text-xs font-bold ring-1 ${statusClass(orden.estado)}`}>{orden.estado}</span>
 					</div>
 				</div>
@@ -141,7 +141,7 @@ const DetalleOrden = () => {
 					<Card className="space-y-5">
 						<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 							<div><h3 className="text-lg font-black">Resumen de la orden</h3><p className="text-sm text-zinc-500">Información completa y costos actuales</p></div>
-							<Button variant="secondary" onClick={() => downloadOrderPdf(orden)}><Download size={16} /> Descargar PDF</Button>
+							<Button variant="secondary" onClick={() => downloadOrderPdf(orden)} className="w-full sm:w-auto"><Download size={16} /> Descargar PDF</Button>
 						</div>
 						<div className="grid gap-3 rounded-lg bg-zinc-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
 							<Info label="Cliente" value={orden.clientes?.nombre} />
@@ -159,7 +159,7 @@ const DetalleOrden = () => {
 						<h3 className="flex items-center gap-2 text-lg font-black"><Wrench size={18} /> Equipos registrados</h3>
 						{orden.equipos_orden?.map((equipo, index) => (
 							<div key={equipo.id} className="rounded-lg border border-zinc-200 p-4">
-								<div className="mb-3 flex items-center justify-between"><div className="font-black">Equipo {index + 1}: {equipo.tipo_equipo} {equipo.marca} {equipo.modelo}</div><span className="text-xs font-bold text-zinc-500">{equipo.serie || 'Sin serie'}</span></div>
+								<div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><div className="font-black">Equipo {index + 1}: {equipo.tipo_equipo} {equipo.marca} {equipo.modelo}</div><span className="text-xs font-bold text-zinc-500">{equipo.serie || 'Sin serie'}</span></div>
 								<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 									<Info label="Técnico" value={equipo.tecnicos?.nombre} /><Info label="Accesorios" value={equipo.accesorios_entregados} /><Info label="Condiciones físicas" value={equipo.condiciones_fisicas} /><Info label="Motivo de ingreso" value={equipo.motivo_ingreso} /><Info label="Diagnóstico" value={cleanText(equipo.diagnostico_especifico)} />
 									<Info label="Tipo de solución" value={cleanText(equipo.tipo_solucion)} />
@@ -201,7 +201,7 @@ const DetalleOrden = () => {
 							</div>)}
 							<div className="rounded-lg bg-zinc-50 p-3 text-sm font-bold">Servicios: {formatMoney(totalServiciosPreview)} · Repuestos: {formatMoney(orden.total_repuestos)} · Total calculado: {formatMoney(totalPreview)}</div>
 							<div className="space-y-1.5"><label htmlFor="observacion_general">Observación</label><textarea id="observacion_general" rows="4" value={form.observacion_general} onChange={e => setForm({ ...form, observacion_general: e.target.value })} disabled={delivered} /></div>
-							<Button type="submit" disabled={saving || delivered}>{saving ? 'Guardando...' : 'Guardar cambios'}</Button>
+							<Button type="submit" disabled={saving || delivered} className="w-full">{saving ? 'Guardando...' : 'Guardar cambios'}</Button>
 						</form>
 					</Card>
 
@@ -214,7 +214,7 @@ const DetalleOrden = () => {
 							<Field label="Tipo / categoría" value={repuesto.tipo_repuesto} onChange={e => setRepuesto({ ...repuesto, tipo_repuesto: e.target.value })} disabled={!canAddRepuesto} />
 							<div className="grid gap-3 sm:grid-cols-2"><Field label="Costo unitario" type="number" min="0.01" step="0.01" value={repuesto.costo} onChange={e => setRepuesto({ ...repuesto, costo: e.target.value })} disabled={!canAddRepuesto} required /><Field label="Cantidad" type="number" min="1" step="1" value={repuesto.cantidad} onChange={e => setRepuesto({ ...repuesto, cantidad: e.target.value })} disabled={!canAddRepuesto} required /></div>
 							<div className="rounded-lg bg-zinc-50 p-3 text-sm font-bold">Subtotal: {formatMoney(subtotalRepuesto)}</div>
-							<Button type="submit" variant="secondary" disabled={repuestoSaving || !canAddRepuesto}>{repuestoSaving ? 'Agregando...' : 'Agregar repuesto'}</Button>
+							<Button type="submit" variant="secondary" disabled={repuestoSaving || !canAddRepuesto} className="w-full">{repuestoSaving ? 'Agregando...' : 'Agregar repuesto'}</Button>
 						</form>
 					</Card>
 				</div>
